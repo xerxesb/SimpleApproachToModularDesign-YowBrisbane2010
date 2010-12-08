@@ -26,18 +26,10 @@ public class SellOneItemTest {
 
     public static class Sale {
         private StringWriter canvas;
-        private Map<String, String> pricesByBarcode;
         private Catalog catalog;
 
-        public Sale(StringWriter canvas, Map<String, String> pricesByBarcode) {
-            this(canvas, pricesByBarcode, new Catalog(pricesByBarcode));
-        }
-
-        public Sale(StringWriter canvas, Map<String, String> pricesByBarcode,
-                Catalog catalog) {
-
+        public Sale(StringWriter canvas, Catalog catalog) {
             this.canvas = canvas;
-            this.pricesByBarcode = pricesByBarcode;
             this.catalog = catalog;
         }
 
@@ -45,7 +37,7 @@ public class SellOneItemTest {
             // SMELL Seems like I should move this out a new
             // client that validates the barcodes. Not sure.
             if ("".equals(barcode)) {
-                canvas.write("Scanning error: empty barcode");
+                displayScannedEmptyBarcodeMessage();
                 return;
             }
 
@@ -55,6 +47,10 @@ public class SellOneItemTest {
             }
             else
                 displayProductNotFoundMessage(barcode);
+        }
+
+        private void displayScannedEmptyBarcodeMessage() {
+            canvas.write("Scanning error: empty barcode");
         }
 
         private void displayPrice(String price) {
@@ -69,11 +65,7 @@ public class SellOneItemTest {
     @Test
     public void productFound() throws Exception {
         StringWriter canvas = new StringWriter();
-        Sale sale = new Sale(canvas, new HashMap<String, String>() {
-            {
-                put("123", "$9.50");
-            }
-        }, new Catalog(
+        Sale sale = new Sale(canvas, new Catalog(
                 Collections.<String, String> singletonMap("123", "$9.50")));
 
         sale.onBarcode("123");
@@ -84,11 +76,11 @@ public class SellOneItemTest {
     @Test
     public void anotherProductFound() throws Exception {
         StringWriter canvas = new StringWriter();
-        Sale sale = new Sale(canvas, new HashMap<String, String>() {
+        Sale sale = new Sale(canvas, new Catalog(new HashMap<String, String>() {
             {
                 put("456", "$17.26");
             }
-        });
+        }));
 
         sale.onBarcode("456");
 
@@ -98,7 +90,8 @@ public class SellOneItemTest {
     @Test
     public void productNotFound() throws Exception {
         StringWriter canvas = new StringWriter();
-        Sale sale = new Sale(canvas, Collections.<String, String> emptyMap());
+        Sale sale = new Sale(canvas, new Catalog(
+                Collections.<String, String> emptyMap()));
 
         sale.onBarcode("999");
 
