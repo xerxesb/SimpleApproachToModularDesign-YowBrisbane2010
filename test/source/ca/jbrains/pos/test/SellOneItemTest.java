@@ -3,6 +3,7 @@ package ca.jbrains.pos.test;
 import static org.junit.Assert.*;
 
 import java.io.*;
+import java.util.*;
 
 import org.junit.*;
 
@@ -15,12 +16,20 @@ public class SellOneItemTest {
         }
 
         public void onBarcode(String barcode) {
-            if ("".equals(barcode))
+            if ("".equals(barcode)) {
                 canvas.write("Scanning error: empty barcode");
-            else if ("123".equals(barcode))
-                canvas.write("$9.50");
-            else if ("456".equals(barcode))
-                canvas.write("$17.26");
+                return;
+            }
+
+            Map<String, String> pricesByBarcode = new HashMap<String, String>() {
+                {
+                    put("123", "$9.50");
+                    put("456", "$17.26");
+                }
+            };
+
+            if (pricesByBarcode.containsKey(barcode))
+                canvas.write(pricesByBarcode.get(barcode));
             else
                 canvas.write("No product found for " + barcode);
         }
