@@ -17,8 +17,10 @@ public class SellOneItemTest {
         public void onBarcode(String barcode) {
             if ("123".equals(barcode))
                 canvas.write("$9.50");
-            else
+            else if ("456".equals(barcode))
                 canvas.write("$17.26");
+            else
+                canvas.write("No product found for " + barcode);
         }
     }
 
@@ -40,5 +42,15 @@ public class SellOneItemTest {
         sale.onBarcode("456");
 
         assertEquals("$17.26", canvas.toString());
+    }
+
+    @Test
+    public void productNotFound() throws Exception {
+        StringWriter canvas = new StringWriter();
+        Sale sale = new Sale(canvas);
+
+        sale.onBarcode("999");
+
+        assertEquals("No product found for 999", canvas.toString());
     }
 }
