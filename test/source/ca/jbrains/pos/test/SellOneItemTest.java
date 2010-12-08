@@ -8,13 +8,37 @@ import java.util.*;
 import org.junit.*;
 
 public class SellOneItemTest {
+    public static class Catalog {
+        private final Map<String, String> pricesByBarcode;
+
+        public Catalog(Map<String, String> pricesByBarcode) {
+            this.pricesByBarcode = pricesByBarcode;
+        }
+
+        public String findPriceByBarcode(String barcode) {
+            return pricesByBarcode.get(barcode);
+        }
+
+        public boolean hasBarcode(String barcode) {
+            return pricesByBarcode.containsKey(barcode);
+        }
+    }
+
     public static class Sale {
         private StringWriter canvas;
         private Map<String, String> pricesByBarcode;
+        private Catalog catalog;
 
         public Sale(StringWriter canvas, Map<String, String> pricesByBarcode) {
+            this(canvas, pricesByBarcode, new Catalog(pricesByBarcode));
+        }
+
+        public Sale(StringWriter canvas, Map<String, String> pricesByBarcode,
+                Catalog catalog) {
+
             this.canvas = canvas;
             this.pricesByBarcode = pricesByBarcode;
+            this.catalog = catalog;
         }
 
         public void onBarcode(String barcode) {
@@ -25,18 +49,16 @@ public class SellOneItemTest {
                 return;
             }
 
-            if (pricesByBarcode.containsKey(barcode))
-                displayPrice(findPriceByBarcode(barcode));
+            if (catalog.hasBarcode(barcode)) {
+                String price = catalog.findPriceByBarcode(barcode);
+                displayPrice(price);
+            }
             else
                 displayProductNotFoundMessage(barcode);
         }
 
         private void displayPrice(String price) {
             canvas.write(price);
-        }
-
-        private String findPriceByBarcode(String barcode) {
-            return pricesByBarcode.get(barcode);
         }
 
         private void displayProductNotFoundMessage(String barcode) {
@@ -51,7 +73,8 @@ public class SellOneItemTest {
             {
                 put("123", "$9.50");
             }
-        });
+        }, new Catalog(
+                Collections.<String, String> singletonMap("123", "$9.50")));
 
         sale.onBarcode("123");
 
