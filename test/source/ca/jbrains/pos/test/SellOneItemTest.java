@@ -15,7 +15,9 @@ public class SellOneItemTest {
         }
 
         public void onBarcode(String barcode) {
-            if ("123".equals(barcode))
+            if ("".equals(barcode))
+                canvas.write("Scanning error: empty barcode");
+            else if ("123".equals(barcode))
                 canvas.write("$9.50");
             else if ("456".equals(barcode))
                 canvas.write("$17.26");
@@ -52,5 +54,15 @@ public class SellOneItemTest {
         sale.onBarcode("999");
 
         assertEquals("No product found for 999", canvas.toString());
+    }
+
+    @Test
+    public void emptyBarcode() throws Exception {
+        StringWriter canvas = new StringWriter();
+        Sale sale = new Sale(canvas);
+
+        sale.onBarcode("");
+
+        assertEquals("Scanning error: empty barcode", canvas.toString());
     }
 }
