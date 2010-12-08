@@ -8,7 +8,7 @@ import org.junit.runner.*;
 @RunWith(JMock.class)
 public class SellOneItemTest {
     public interface Catalog {
-        void findPriceByBarcode(String barcode);
+        int findPriceByBarcode(String barcode);
     }
 
     public interface Display {
@@ -17,10 +17,10 @@ public class SellOneItemTest {
 
     private JUnit4Mockery mockery = new JUnit4Mockery();
     private Display display = mockery.mock(Display.class);
+    private Catalog catalog = mockery.mock(Catalog.class);
 
     @Test
     public void productFound() throws Exception {
-        final Catalog catalog = mockery.mock(Catalog.class);
         mockery.checking(new Expectations() {
             {
                 allowing(catalog).findPriceByBarcode(with(any(String.class)));
@@ -38,6 +38,6 @@ public class SellOneItemTest {
     }
 
     private void onBarcode(String barcode) {
-        display.displayPrice(950);
+        display.displayPrice(catalog.findPriceByBarcode(barcode));
     }
 }
